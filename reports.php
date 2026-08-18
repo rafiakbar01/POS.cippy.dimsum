@@ -284,7 +284,7 @@ require_once __DIR__ . '/includes/navbar.php';
                         Rp ${parseInt(tx.profit).toLocaleString('id-ID')}
                     </td>
                     <td class="py-3 px-3 sm:px-4 text-center">
-                        <button onclick="voidTx(${tx.id})" title="Batalkan Transaksi" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors active:scale-95">
+                        <button onclick="voidTx(${tx.id}, '${tx.transaction_code}')" title="Batalkan Transaksi" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors active:scale-95">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </td>
@@ -295,7 +295,7 @@ require_once __DIR__ . '/includes/navbar.php';
         lucide.createIcons();
     }
 
-    async function voidTx(txId) {
+    async function voidTx(txId, txCode) {
         const isConfirmed = await customConfirm({
             title: 'Batalkan Transaksi',
             message: 'Apakah Anda yakin ingin membatalkan transaksi ini?',
@@ -310,20 +310,24 @@ require_once __DIR__ . '/includes/navbar.php';
             const res = await fetch('api/pos.php?action=void_transaction', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: txId })
+                body: JSON.stringify({ id: txId, transaction_code: txCode })
             });
 
             const result = await res.json();
             if(result.status === 'success') {
-                // Remove from LocalStorage backup
+                // 1. Remove from LocalStorage backup by BOTH id and transaction_code
                 try {
                     let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
-                    localBackup = localBackup.filter(t => t.id !== txId);
+                    localBackup = localBackup.filter(t => (t.id != txId && t.transaction_code !== txCode));
                     localStorage.setItem('cippy_tx_history', JSON.stringify(localBackup));
                 } catch(err) {}
 
-                showToast('Transaksi berhasil dibatalkan', 'success');
-                loadReports();
+                // 2. Instantly update in-memory reportData & re-render UI immediately without page refresh!
+                reportData = reportData.filter(t => (t.id != txId && t.transaction_code !== txCode));
+                renderReportStats(reportData);
+                renderReportTable(reportData);
+
+                showToast('Transaksi berhasil dibatalkan!', 'success');
             } else {
                 showToast('Gagal membatalkan transaksi: ' + result.message, 'error');
             }

@@ -229,14 +229,20 @@ function voidTransaction($pdo) {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $txId = intval($input['id'] ?? 0);
+        $txCode = trim($input['transaction_code'] ?? '');
 
-        if (!$txId) {
+        if (!$txId && empty($txCode)) {
             echo json_encode(['status' => 'error', 'message' => 'ID Transaksi tidak valid']);
             return;
         }
 
-        $stmt = $pdo->prepare("DELETE FROM transactions WHERE id = :id");
-        $stmt->execute([':id' => $txId]);
+        if ($txId > 0) {
+            $stmt = $pdo->prepare("DELETE FROM transactions WHERE id = :id");
+            $stmt->execute([':id' => $txId]);
+        } else {
+            $stmt = $pdo->prepare("DELETE FROM transactions WHERE transaction_code = :code");
+            $stmt->execute([':code' => $txCode]);
+        }
 
         echo json_encode(['status' => 'success', 'message' => 'Transaksi berhasil dibatalkan']);
     } catch (Exception $e) {
