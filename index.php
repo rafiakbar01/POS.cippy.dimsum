@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/navbar.php';
 ?>
 
-<!-- Main Content Area with Bottom Padding for Mobile Nav & Floating Cart Bar -->
+<!-- Main Content Area -->
 <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 pb-28 lg:pb-8">
 
     <!-- LEFT SIDE: MENU SELECTION & CATALOG -->
@@ -17,7 +17,7 @@ require_once __DIR__ . '/includes/navbar.php';
                 <p class="text-[11px] sm:text-xs text-pastel-brownLight mt-0.5" id="variantSubtitle">Varian Cippy Dimsum Mini - Kecil-Kecil, Nikmatnya Juara!</p>
             </div>
 
-            <!-- Variant Switcher Buttons (Touch friendly) -->
+            <!-- Variant Switcher Buttons -->
             <div class="flex bg-white p-1 rounded-xl border border-pastel-peach/40 shadow-xs w-full sm:w-auto">
                 <button onclick="setVariant('mini')" id="btnVariantMini" class="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 rounded-lg font-display font-bold text-xs sm:text-sm transition-all duration-200 bg-pastel-coral text-white shadow-xs flex items-center justify-center gap-1.5 active:scale-95">
                     <span>🥟 Dimsum Mini</span>
@@ -31,7 +31,7 @@ require_once __DIR__ . '/includes/navbar.php';
         <!-- Search Bar & Category Filters -->
         <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
             
-            <!-- Category Pills (Horizontal Scroll) -->
+            <!-- Category Pills -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0 scrollbar-none snap-x" id="categoryContainer">
                 <button onclick="setCategory('all')" data-cat="all" class="cat-btn active px-3.5 py-2 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-pastel-brown text-white shadow-xs snap-start">
                     Semua Menu
@@ -68,8 +68,8 @@ require_once __DIR__ . '/includes/navbar.php';
 
     </div>
 
-    <!-- RIGHT SIDE: LIVE CART & SUMMARY (Desktop Panel / Mobile Drawer) -->
-    <div id="cartPanel" class="hidden lg:flex w-full lg:w-96 flex-col bg-white rounded-2xl border border-pastel-peach/30 shadow-sm p-4 sm:p-5 h-fit sticky top-20">
+    <!-- RIGHT SIDE: DESKTOP CART PANEL (Visible on lg screens) -->
+    <div class="hidden lg:flex w-96 flex-col bg-white rounded-2xl border border-pastel-peach/30 shadow-sm p-5 h-fit sticky top-20">
         
         <div class="flex items-center justify-between pb-3 border-b border-pastel-cream font-display">
             <div class="flex items-center gap-2">
@@ -82,32 +82,19 @@ require_once __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <button onclick="clearCart()" class="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Kosongkan</span>
-                </button>
-
-                <!-- Mobile Close Cart Button -->
-                <button onclick="toggleMobileCart(false)" class="lg:hidden p-1.5 text-pastel-brownLight hover:text-pastel-brown bg-pastel-creamSoft rounded-lg">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
+            <button onclick="clearCart()" class="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Kosongkan</span>
+            </button>
         </div>
 
         <!-- Cart Items Scroll Area -->
         <div id="cartItemsList" class="flex-1 my-3 overflow-y-auto max-h-[340px] space-y-2.5 pr-1">
             <!-- Dynamic Cart Items loaded via JS -->
-            <div class="py-10 text-center text-pastel-brownLight/60 flex flex-col items-center justify-center">
-                <i data-lucide="shopping-bag" class="w-12 h-12 stroke-[1.5] mb-2 text-pastel-peach"></i>
-                <p class="text-xs font-medium">Belum ada menu yang dipilih</p>
-                <p class="text-[10px] text-pastel-brownLight/40 mt-1">Klik item menu untuk menambah</p>
-            </div>
         </div>
 
         <!-- Order Note & Totals -->
         <div class="pt-3 border-t border-pastel-cream space-y-3">
-            
             <div>
                 <label class="block text-[11px] font-bold text-pastel-brownLight mb-1 flex items-center gap-1">
                     <i data-lucide="sticky-note" class="w-3 h-3 text-pastel-orange"></i>
@@ -137,9 +124,10 @@ require_once __DIR__ . '/includes/navbar.php';
 
 </main>
 
-<!-- FLOATING MOBILE CART BAR (Visible on Mobile when cart has items) -->
-<div id="mobileCartFloatingBar" class="lg:hidden fixed bottom-14 left-0 right-0 z-30 px-4 pb-2 transition-all duration-300 transform translate-y-full opacity-0 pointer-events-none">
-    <div onclick="toggleMobileCart(true)" class="bg-pastel-brown text-white p-3.5 rounded-2xl shadow-xl border border-pastel-peach/40 flex items-center justify-between cursor-pointer active:scale-98">
+
+<!-- FLOATING MOBILE CART BAR (Visible on Mobile) -->
+<div id="mobileCartFloatingBar" class="lg:hidden fixed bottom-14 left-0 right-0 z-30 px-3 pb-2 transition-all duration-300 transform translate-y-full opacity-0 pointer-events-none">
+    <div onclick="openMobileCartModal()" class="bg-pastel-brown text-white p-3 sm:p-3.5 rounded-2xl shadow-xl border border-pastel-peach/40 flex items-center justify-between cursor-pointer active:scale-98">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-pastel-coral flex items-center justify-center text-white font-extrabold text-sm shadow-xs">
                 <span id="mobileCartBadge">0</span>
@@ -150,17 +138,64 @@ require_once __DIR__ . '/includes/navbar.php';
             </div>
         </div>
 
-        <div class="flex items-center gap-1 bg-pastel-coral text-white px-3 py-1.5 rounded-xl font-bold text-xs">
+        <div class="flex items-center gap-1.5 bg-pastel-coral text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs">
             <span>Lihat Keranjang</span>
-            <i data-lucide="chevron-up" class="w-4 h-4"></i>
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
         </div>
     </div>
 </div>
 
 
-<!-- MODAL PEMBAYARAN (Mobile Touch Responsive) -->
+<!-- DEDICATED MOBILE CART MODAL (Full Responsive Bottom Sheet) -->
+<div id="mobileCartModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center p-0 lg:hidden">
+    <div class="bg-white w-full rounded-t-3xl shadow-2xl border-t border-pastel-peach/40 overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-200">
+        
+        <div class="bg-pastel-creamSoft p-4 border-b border-pastel-cream flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-pastel-coral/15 text-pastel-coralDark rounded-lg">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-display font-bold text-base text-pastel-brown">Keranjang Pesanan</h3>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="clearCart()" class="text-xs text-rose-500 font-semibold px-2 py-1 rounded-lg bg-rose-50">
+                    Kosongkan
+                </button>
+                <button onclick="closeMobileCartModal()" class="text-pastel-brownLight p-1 rounded-lg">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrollable Mobile Cart Items -->
+        <div id="mobileCartItemsList" class="p-4 overflow-y-auto space-y-2.5 flex-1">
+            <!-- Dynamic Cart Items -->
+        </div>
+
+        <!-- Mobile Cart Footer -->
+        <div class="p-4 border-t border-pastel-cream bg-pastel-creamSoft/30 space-y-3">
+            <div>
+                <input type="text" id="mobileCustomerNote" oninput="syncCustomerNote(this.value)" placeholder="Catatan pesanan (opsional)..." class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-pastel-cream text-pastel-brown">
+            </div>
+
+            <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-pastel-cream">
+                <span class="text-xs text-pastel-brownLight font-medium">Total Tagihan:</span>
+                <span id="mobileTotalText" class="font-display font-extrabold text-lg text-pastel-coralDark">Rp 0</span>
+            </div>
+
+            <button onclick="closeMobileCartModal(); openPaymentModal();" id="mobileBtnCheckout" disabled class="w-full py-3.5 bg-pastel-coral hover:bg-pastel-coralDark disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-xl font-display font-bold text-sm shadow-md transition-all">
+                Pilih Pembayaran
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- MODAL PEMBAYARAN (With Added 15k, 25k, 55k Buttons) -->
 <div id="paymentModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-pastel-peach/40 overflow-hidden animate-in fade-in slide-in-from-bottom-6 sm:zoom-in duration-200 max-h-[90vh] flex flex-col">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-pastel-peach/40 overflow-hidden animate-in fade-in slide-in-from-bottom-6 sm:zoom-in duration-200 max-h-[92vh] flex flex-col">
         
         <div class="bg-pastel-creamSoft p-4 border-b border-pastel-cream flex items-center justify-between">
             <h3 class="font-display font-bold text-base text-pastel-brown flex items-center gap-2">
@@ -174,7 +209,7 @@ require_once __DIR__ . '/includes/navbar.php';
         <div class="p-4 sm:p-5 space-y-4 overflow-y-auto">
             
             <!-- Summary Amount -->
-            <div class="bg-pastel-peach/10 p-4 rounded-2xl border border-pastel-peach/30 text-center">
+            <div class="bg-pastel-peach/10 p-3.5 rounded-2xl border border-pastel-peach/30 text-center">
                 <p class="text-xs text-pastel-brownLight font-medium">Total Tagihan</p>
                 <p class="font-display font-extrabold text-2xl text-pastel-coralDark" id="modalTotalText">Rp 0</p>
             </div>
@@ -198,18 +233,26 @@ require_once __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
 
-            <!-- Cash Input Section (Show only if Tunai selected) -->
+            <!-- Cash Input Section (With 15k, 25k, 55k Buttons) -->
             <div id="cashInputSection" class="space-y-2.5 pt-2 border-t border-pastel-cream">
                 <label class="block text-xs font-bold text-pastel-brown">Uang Diterima (Rp)</label>
                 <input type="number" id="cashGivenInput" oninput="calculateChange()" placeholder="0" class="w-full px-3 py-2.5 text-lg font-bold bg-white rounded-xl border border-pastel-peach focus:outline-none focus:ring-2 focus:ring-pastel-coral text-pastel-brown">
                 
-                <!-- Quick Cash Buttons (Minimum 44px height for touch ergonomics) -->
-                <div class="grid grid-cols-5 gap-1.5 pt-1">
-                    <button type="button" onclick="setQuickCash('pas')" class="py-2.5 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">Pas</button>
-                    <button type="button" onclick="setQuickCash(10000)" class="py-2.5 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">10k</button>
-                    <button type="button" onclick="setQuickCash(20000)" class="py-2.5 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">20k</button>
-                    <button type="button" onclick="setQuickCash(50000)" class="py-2.5 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">50k</button>
-                    <button type="button" onclick="setQuickCash(100000)" class="py-2.5 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">100k</button>
+                <!-- Quick Cash Buttons Grid (2 Rows of 4 Buttons: Pas, 10k, 15k, 20k, 25k, 50k, 55k, 100k) -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button type="button" onclick="setQuickCash('pas')" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">Pas</button>
+                        <button type="button" onclick="setQuickCash(10000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">10k</button>
+                        <button type="button" onclick="setQuickCash(15000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream font-extrabold text-pastel-coralDark">15k</button>
+                        <button type="button" onclick="setQuickCash(20000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">20k</button>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button type="button" onclick="setQuickCash(25000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream font-extrabold text-pastel-coralDark">25k</button>
+                        <button type="button" onclick="setQuickCash(50000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">50k</button>
+                        <button type="button" onclick="setQuickCash(55000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream font-extrabold text-pastel-coralDark">55k</button>
+                        <button type="button" onclick="setQuickCash(100000)" class="py-2 bg-pastel-creamSoft hover:bg-pastel-cream active:bg-pastel-cream text-pastel-brown font-bold text-xs rounded-xl border border-pastel-cream">100k</button>
+                    </div>
                 </div>
 
                 <!-- Change Output -->
@@ -420,36 +463,52 @@ require_once __DIR__ . '/includes/navbar.php';
         }
     }
 
+    function syncCustomerNote(val) {
+        document.getElementById('customerNote').value = val;
+    }
+
     function clearCart() {
         cart = [];
         renderCart();
-        toggleMobileCart(false);
+        closeMobileCartModal();
     }
 
-    function toggleMobileCart(show) {
-        const panel = document.getElementById('cartPanel');
-        if(show) {
-            panel.className = 'fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl border-t border-pastel-peach/40 shadow-2xl p-4 flex flex-col max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 lg:sticky lg:top-20 lg:h-fit lg:max-h-none lg:rounded-2xl lg:shadow-sm lg:border lg:z-auto';
-        } else {
-            panel.className = 'hidden lg:flex w-full lg:w-96 flex-col bg-white rounded-2xl border border-pastel-peach/30 shadow-sm p-4 sm:p-5 h-fit sticky top-20';
-        }
+    function openMobileCartModal() {
+        const modal = document.getElementById('mobileCartModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeMobileCartModal() {
+        const modal = document.getElementById('mobileCartModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
     function renderCart() {
         const container = document.getElementById('cartItemsList');
+        const mobileContainer = document.getElementById('mobileCartItemsList');
+        
         const cartCount = document.getElementById('cartItemCount');
         const subtotalText = document.getElementById('subtotalText');
         const totalText = document.getElementById('totalText');
+        const mobileTotalText = document.getElementById('mobileTotalText');
+        
         const btnCheckout = document.getElementById('btnCheckout');
+        const mobileBtnCheckout = document.getElementById('mobileBtnCheckout');
 
         const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
         const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
+        const totalFormatted = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+
         cartCount.innerText = `${totalItems} item dipilih`;
-        subtotalText.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-        totalText.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+        subtotalText.innerText = totalFormatted;
+        totalText.innerText = totalFormatted;
+        mobileTotalText.innerText = totalFormatted;
 
         btnCheckout.disabled = cart.length === 0;
+        mobileBtnCheckout.disabled = cart.length === 0;
 
         // Mobile Floating Bar Updates
         const mobileFloatingBar = document.getElementById('mobileCartFloatingBar');
@@ -458,25 +517,28 @@ require_once __DIR__ . '/includes/navbar.php';
 
         if(totalItems > 0) {
             mobileCartBadge.innerText = totalItems;
-            mobileCartTotal.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+            mobileCartTotal.innerText = totalFormatted;
             mobileFloatingBar.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
         } else {
             mobileFloatingBar.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
         }
 
+        const emptyHtml = `
+            <div class="py-10 text-center text-pastel-brownLight/60 flex flex-col items-center justify-center">
+                <i data-lucide="shopping-bag" class="w-12 h-12 stroke-[1.5] mb-2 text-pastel-peach"></i>
+                <p class="text-xs font-medium">Belum ada menu yang dipilih</p>
+                <p class="text-[10px] text-pastel-brownLight/40 mt-1">Klik item menu di sebelah kiri untuk menambah</p>
+            </div>
+        `;
+
         if(cart.length === 0) {
-            container.innerHTML = `
-                <div class="py-10 text-center text-pastel-brownLight/60 flex flex-col items-center justify-center">
-                    <i data-lucide="shopping-bag" class="w-12 h-12 stroke-[1.5] mb-2 text-pastel-peach"></i>
-                    <p class="text-xs font-medium">Belum ada menu yang dipilih</p>
-                    <p class="text-[10px] text-pastel-brownLight/40 mt-1">Klik item menu untuk menambah</p>
-                </div>
-            `;
+            container.innerHTML = emptyHtml;
+            mobileContainer.innerHTML = emptyHtml;
             lucide.createIcons();
             return;
         }
 
-        container.innerHTML = cart.map(item => `
+        const cartHtml = cart.map(item => `
             <div class="p-2.5 bg-pastel-creamSoft/30 rounded-xl border border-pastel-cream/80 space-y-1.5">
                 <div class="flex items-start justify-between">
                     <div>
@@ -499,6 +561,9 @@ require_once __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
         `).join('');
+
+        container.innerHTML = cartHtml;
+        mobileContainer.innerHTML = cartHtml;
 
         lucide.createIcons();
     }
@@ -562,7 +627,7 @@ require_once __DIR__ . '/includes/navbar.php';
         
         const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
         const cashGiven = parseInt(document.getElementById('cashGivenInput').value) || 0;
-        const customerNote = document.getElementById('customerNote').value;
+        const customerNote = document.getElementById('customerNote').value || document.getElementById('mobileCustomerNote').value;
 
         if(selectedPaymentMethod === 'Tunai' && cashGiven < grandTotal) {
             showToast('Uang yang diberikan kurang dari total tagihan!', 'warning');
@@ -595,7 +660,7 @@ require_once __DIR__ . '/includes/navbar.php';
 
             if(result.status === 'success') {
                 closePaymentModal();
-                toggleMobileCart(false);
+                closeMobileCartModal();
                 triggerSuccessConfetti(); // 🎉 Trigger Confetti Celebration Animation!
                 
                 // Save to LocalStorage Backup permanently so data never resets!
@@ -613,6 +678,7 @@ require_once __DIR__ . '/includes/navbar.php';
                 showSuccessModal(result.data);
                 cart = [];
                 document.getElementById('customerNote').value = '';
+                document.getElementById('mobileCustomerNote').value = '';
                 renderCart();
             } else {
                 showToast('Gagal menyimpan transaksi: ' + result.message, 'error');
