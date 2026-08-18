@@ -162,37 +162,33 @@ require_once __DIR__ . '/includes/navbar.php';
             const res = await fetch(`api/pos.php?action=get_transactions&start_date=${startDate}&end_date=${endDate}&payment_method=${payment}`);
             const result = await res.json();
 
-            let serverData = (result.status === 'success') ? result.data : [];
+            if (result.status === 'success') {
+                // 1. Data utama diambil LANGSUNG dari Cloud Database (Supabase)
+                let dbData = result.data || [];
 
-            // Merge with LocalStorage permanent device backup
-            let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
-            
-            // Filter local backup by date range & payment method
-            let filteredLocal = localBackup.filter(tx => {
-                const txDate = (tx.created_at || '').split(' ')[0];
-                const matchDate = (!startDate || txDate >= startDate) && (!endDate || txDate <= endDate);
-                const matchPayment = (payment === 'all') || (tx.payment_method === payment);
-                return matchDate && matchPayment;
-            });
-
-            // Combine unique transactions
-            const combinedMap = new Map();
-            serverData.forEach(tx => combinedMap.set(tx.transaction_code, tx));
-            filteredLocal.forEach(tx => {
-                if(!combinedMap.has(tx.transaction_code)) {
-                    combinedMap.set(tx.transaction_code, tx);
+                // 2. Jika database mengembalikan data, gunakan data database tersebut
+                if (dbData.length > 0) {
+                    reportData = dbData;
+                } else {
+                    // Cadangan jika perangkat sedang offline / database kosong
+                    let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
+                    let filteredLocal = localBackup.filter(tx => {
+                        const txDate = (tx.created_at || '').split(' ')[0];
+                        const matchDate = (!startDate || txDate >= startDate) && (!endDate || txDate <= endDate);
+                        const matchPayment = (payment === 'all') || (tx.payment_method === payment);
+                        return matchDate && matchPayment;
+                    });
+                    reportData = filteredLocal;
                 }
-            });
 
-            reportData = Array.from(combinedMap.values());
-            // Sort by created_at descending
-            reportData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                // Urutkan transaksi dari yang paling baru
+                reportData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-            renderReportStats(reportData);
-            renderReportTable(reportData);
-
+                renderReportStats(reportData);
+                renderReportTable(reportData);
+            }
         } catch (e) {
-            console.error('Error loading reports:', e);
+            console.error('Error loading reports from database:', e);
         }
     }
 
