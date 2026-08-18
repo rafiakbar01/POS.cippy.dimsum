@@ -1,6 +1,7 @@
 <?php
 // api/pos.php - Handle POS transactions, fetching menus, and getting transaction logs
 
+date_default_timezone_set('Asia/Jakarta');
 header('Content-Type: application/json');
 require_once __DIR__ . '/../db/db_connect.php';
 
@@ -67,11 +68,13 @@ function processCheckout($pdo) {
         $profit = $totalAmount - $totalCost;
         $changeAmount = ($paymentMethod === 'Tunai') ? max(0, $cashGiven - $totalAmount) : 0;
 
-        // Generate Transaction Code (e.g., CIPPY-20260818-1001)
+        // Generate Transaction Code & WIB Timestamp
         $dateStr = date('Ymd');
-        $timeStr = date('H:i:s');
+        $wibNow = date('Y-m-d H:i:s');
+        $wibDate = date('Y-m-d');
         
-        $stmtCount = $pdo->query("SELECT COUNT(*) as cnt FROM transactions WHERE DATE(created_at) = DATE('now')");
+        $stmtCount = $pdo->prepare("SELECT COUNT(*) as cnt FROM transactions WHERE DATE(created_at) = :wib_date");
+        $stmtCount->execute([':wib_date' => $wibDate]);
         $todayCount = $stmtCount->fetch()['cnt'] + 1;
         $transactionCode = 'CIPPY-' . $dateStr . '-' . str_pad($todayCount, 4, '0', STR_PAD_LEFT);
 
@@ -79,7 +82,7 @@ function processCheckout($pdo) {
 
         $stmtTx = $pdo->prepare("INSERT INTO transactions 
             (transaction_code, total_amount, total_cost, profit, payment_method, cash_given, change_amount, customer_note, created_at) 
-            VALUES (:code, :amount, :cost, :profit, :method, :cash, :change, :note, CURRENT_TIMESTAMP)");
+            VALUES (:code, :amount, :cost, :profit, :method, :cash, :change, :note, :created_at)");
 
         $stmtTx->execute([
             ':code' => $transactionCode,
@@ -89,7 +92,8 @@ function processCheckout($pdo) {
             ':method' => $paymentMethod,
             ':cash' => $cashGiven,
             ':change' => $changeAmount,
-            ':note' => $customerNote
+            ':note' => $customerNote,
+            ':created_at' => $wibNow
         ]);
 
         $transactionId = $pdo->lastInsertId();
@@ -134,7 +138,7 @@ function processCheckout($pdo) {
                 'payment_method' => $paymentMethod,
                 'cash_given' => $cashGiven,
                 'change_amount' => $changeAmount,
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => $wibNow
             ]
         ]);
 
@@ -152,9 +156,9 @@ function getTransactions($pdo) {
         $endDate = $_GET['end_date'] ?? date('Y-m-d');
         $paymentMethod = $_GET['payment_method'] ?? 'all';
 
-        $query = "SELECT t.*, strftime('%Y-%m-%d %H:%M:%S', t.created_at, 'localtime') as formatted_time 
+        $query = "SELECT t.*, t.created_at as formatted_time 
                   FROM transactions t 
-                  WHERE DATE(t.created_at, 'localtime') BETWEEN :start_date AND :end_date";
+                  WHERE DATE(t.created_at) BETWEEN :start_date AND :end_date";
         $params = [
             ':start_date' => $startDate,
             ':end_date' => $endDate
@@ -195,15 +199,17 @@ function getTodaySummary($pdo) {
             COALESCE(SUM(total_cost), 0) as total_modal,
             COALESCE(SUM(profit), 0) as total_profit
             FROM transactions 
-            WHERE DATE(created_at, 'localtime') = :today");
+            WHERE DATE(created_at) = :today");
         $stmt->execute([':today' => $today]);
         $summary = $stmt->fetch();
 
         // Payment method breakdown
         $stmtPay = $pdo->prepare("SELECT payment_method, COUNT(*) as count, SUM(total_amount) as total 
             FROM transactions 
-            WHERE DATE(created_at, 'localtime') = :today 
+            WHERE DATE(created_at) = :today 
             GROUP BY payment_method");
+        $stmtPay->execute([':today' => $today]);
+        $payments = $stmtPay->fetchAll();
         $stmtPay->execute([':today' => $today]);
         $payments = $stmtPay->fetchAll();
 

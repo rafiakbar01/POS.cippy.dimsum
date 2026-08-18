@@ -1,6 +1,8 @@
 <?php
 // db/db_connect.php - SQLite PDO Database Connection & Auto Seed for Cippy Dimsum POS
 
+date_default_timezone_set('Asia/Jakarta');
+
 // Support Vercel serverless environment (/tmp directory) or local Laragon (__DIR__)
 $isVercel = isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL') || (strpos(__DIR__, '/var/task') !== false);
 
