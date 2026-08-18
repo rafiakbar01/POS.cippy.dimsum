@@ -597,6 +597,19 @@ require_once __DIR__ . '/includes/navbar.php';
                 closePaymentModal();
                 toggleMobileCart(false);
                 triggerSuccessConfetti(); // 🎉 Trigger Confetti Celebration Animation!
+                
+                // Save to LocalStorage Backup permanently so data never resets!
+                try {
+                    let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
+                    localBackup.unshift({
+                        ...result.data,
+                        items: [...cart]
+                    });
+                    localStorage.setItem('cippy_tx_history', JSON.stringify(localBackup));
+                } catch(err) {
+                    console.error('LocalStorage Backup Error:', err);
+                }
+
                 showSuccessModal(result.data);
                 cart = [];
                 document.getElementById('customerNote').value = '';

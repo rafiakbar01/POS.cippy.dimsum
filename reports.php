@@ -162,11 +162,35 @@ require_once __DIR__ . '/includes/navbar.php';
             const res = await fetch(`api/pos.php?action=get_transactions&start_date=${startDate}&end_date=${endDate}&payment_method=${payment}`);
             const result = await res.json();
 
-            if(result.status === 'success') {
-                reportData = result.data;
-                renderReportStats(reportData);
-                renderReportTable(reportData);
-            }
+            let serverData = (result.status === 'success') ? result.data : [];
+
+            // Merge with LocalStorage permanent device backup
+            let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
+            
+            // Filter local backup by date range & payment method
+            let filteredLocal = localBackup.filter(tx => {
+                const txDate = (tx.created_at || '').split(' ')[0];
+                const matchDate = (!startDate || txDate >= startDate) && (!endDate || txDate <= endDate);
+                const matchPayment = (payment === 'all') || (tx.payment_method === payment);
+                return matchDate && matchPayment;
+            });
+
+            // Combine unique transactions
+            const combinedMap = new Map();
+            serverData.forEach(tx => combinedMap.set(tx.transaction_code, tx));
+            filteredLocal.forEach(tx => {
+                if(!combinedMap.has(tx.transaction_code)) {
+                    combinedMap.set(tx.transaction_code, tx);
+                }
+            });
+
+            reportData = Array.from(combinedMap.values());
+            // Sort by created_at descending
+            reportData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            renderReportStats(reportData);
+            renderReportTable(reportData);
+
         } catch (e) {
             console.error('Error loading reports:', e);
         }
@@ -291,6 +315,13 @@ require_once __DIR__ . '/includes/navbar.php';
 
             const result = await res.json();
             if(result.status === 'success') {
+                // Remove from LocalStorage backup
+                try {
+                    let localBackup = JSON.parse(localStorage.getItem('cippy_tx_history') || '[]');
+                    localBackup = localBackup.filter(t => t.id !== txId);
+                    localStorage.setItem('cippy_tx_history', JSON.stringify(localBackup));
+                } catch(err) {}
+
                 showToast('Transaksi berhasil dibatalkan', 'success');
                 loadReports();
             } else {
