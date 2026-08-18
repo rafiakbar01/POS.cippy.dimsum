@@ -6,7 +6,7 @@ Sistem Point of Sale (POS) Kasir & Rekap Keuntungan Cippy Dimsum modern, respons
 - **Kasir Varian Dimsum**: Dual varian **Cippy Dimsum Mini** & **Cippy Dimsum Besar**.
 - **Filter & Search**: Mentai/Mayo Cheese, Dimsum Lava 🔥, Dimsum Original, Dimsum Bakar, & Party Box Mix 📦.
 - **Kalkulator Kembalian & Nominal Cepat**: Hitung kembalian otomatis dengan tombol nominal `Pas`, `10k`, `20k`, `50k`, `100k`.
-- **Rekap Keuangan & Profit**: Hitung Omset, Modal HPP, dan Keuntungan Bersih (Profit/Untung) per jam transaksi.
+- **Rekap Keuangan & Profit**: Hitung Omset, Total Modal, dan Keuntungan Bersih (Profit/Untung) per jam transaksi.
 - **Export Laporan**: Export to Excel (`.xlsx`) & PDF (`.pdf`).
 - **Penyimpanan**: SQLite Database (`db/database.sqlite`) dengan auto-seeding 26 menu brosur original.
 - **Vercel Ready**: Siap dideploy ke Vercel secara gratis.

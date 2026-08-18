@@ -9,9 +9,9 @@ require_once __DIR__ . '/includes/navbar.php';
         <div>
             <h2 class="font-display font-bold text-lg sm:text-xl text-pastel-brown flex items-center gap-2">
                 <i data-lucide="utensils" class="w-5 h-5 sm:w-6 sm:h-6 text-pastel-coral"></i>
-                <span>Kelola Menu & Harga Modal (HPP)</span>
+                <span>Kelola Menu & Harga Modal</span>
             </h2>
-            <p class="text-[11px] sm:text-xs text-pastel-brownLight mt-0.5 sm:mt-1">Atur daftar menu, harga jual, dan modal (HPP) untuk perhitungan untung rugi yang presisi.</p>
+            <p class="text-[11px] sm:text-xs text-pastel-brownLight mt-0.5 sm:mt-1">Atur daftar menu, harga jual, dan modal untuk perhitungan untung rugi yang presisi.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center w-full sm:w-auto">
@@ -65,7 +65,7 @@ require_once __DIR__ . '/includes/navbar.php';
                         <th class="py-3 px-3 sm:px-4">Kategori</th>
                         <th class="py-3 px-3 sm:px-4">Nama Menu & Porsi</th>
                         <th class="py-3 px-3 sm:px-4">Harga Jual</th>
-                        <th class="py-3 px-3 sm:px-4">Modal (HPP)</th>
+                        <th class="py-3 px-3 sm:px-4">Harga Modal</th>
                         <th class="py-3 px-3 sm:px-4 text-emerald-700">Margin/pcs</th>
                         <th class="py-3 px-3 sm:px-4 text-center">Status</th>
                         <th class="py-3 px-3 sm:px-4 text-center">Aksi</th>
@@ -135,7 +135,7 @@ require_once __DIR__ . '/includes/navbar.php';
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-pastel-brown mb-1">Modal HPP (Rp)</label>
+                    <label class="block text-xs font-bold text-pastel-brown mb-1">Harga Modal (Rp)</label>
                     <input type="number" id="formCost" required placeholder="6000" class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-pastel-cream text-pastel-brown font-bold focus:outline-none">
                 </div>
             </div>

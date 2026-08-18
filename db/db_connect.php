@@ -32,7 +32,7 @@ try {
         name TEXT NOT NULL,
         portion TEXT DEFAULT '',
         price INTEGER NOT NULL,
-        cost INTEGER NOT NULL DEFAULT 0, -- HPP / Modal
+        cost INTEGER NOT NULL DEFAULT 0, -- Harga Modal
         is_available INTEGER NOT NULL DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )");

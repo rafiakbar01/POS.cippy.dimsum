@@ -11,7 +11,7 @@ require_once __DIR__ . '/includes/navbar.php';
                 <i data-lucide="line-chart" class="w-5 h-5 sm:w-6 sm:h-6 text-pastel-coral"></i>
                 <span>Rekap Keuntungan & Penjualan</span>
             </h2>
-            <p class="text-[11px] sm:text-xs text-pastel-brownLight mt-1">Pantau omset, modal HPP, dan keuntungan bersih secara real-time berdasarkan jam transaksi.</p>
+            <p class="text-[11px] sm:text-xs text-pastel-brownLight mt-1">Pantau omset, total modal, dan keuntungan bersih secara real-time berdasarkan jam transaksi.</p>
         </div>
 
         <!-- Date Range Filter Form -->
@@ -62,13 +62,13 @@ require_once __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
 
-            <!-- Modal HPP Card -->
+            <!-- Modal Card -->
             <div class="bg-gradient-to-br from-stone-50 to-white p-3.5 sm:p-4 rounded-2xl border border-stone-200 shadow-xs flex items-center gap-2.5 sm:gap-3">
                 <div class="p-2.5 sm:p-3 bg-stone-200 text-stone-700 rounded-xl">
                     <i data-lucide="box" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] sm:text-xs font-medium text-stone-600">Modal HPP</p>
+                    <p class="text-[10px] sm:text-xs font-medium text-stone-600">Total Modal</p>
                     <h3 class="font-display font-extrabold text-sm sm:text-xl text-stone-800 truncate" id="statModal">Rp 0</h3>
                 </div>
             </div>
@@ -352,7 +352,7 @@ require_once __DIR__ . '/includes/navbar.php';
                     'Qty': item.quantity,
                     'Harga Satuan (Rp)': item.price,
                     'Subtotal Omset (Rp)': item.subtotal,
-                    'Subtotal Modal HPP (Rp)': item.subtotal_cost,
+                    'Subtotal Modal (Rp)': item.subtotal_cost,
                     'Untung / Profit (Rp)': item.subtotal - item.subtotal_cost,
                     'Metode Bayar': tx.payment_method,
                     'Catatan Pesanan': tx.customer_note || item.item_note || '-'
