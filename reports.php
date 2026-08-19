@@ -376,24 +376,209 @@ require_once __DIR__ . '/includes/navbar.php';
             return;
         }
 
-        const element = document.getElementById('reportExportArea');
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
+        const printTime = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB';
 
-        showToast('Memproses file PDF... 📄', 'warning');
+        showToast('Membuat Laporan PDF Format Inventory... 📄', 'warning');
+
+        // 1. Calculate Totals
+        let grandOmset = 0;
+        let grandModal = 0;
+        let grandProfit = 0;
+        let grandQty = 0;
+
+        // 2. Aggregate Inventory Item Sales
+        const itemSummaryMap = new Map();
+
+        reportData.forEach(tx => {
+            grandOmset += parseInt(tx.total_amount);
+            grandModal += parseInt(tx.total_cost);
+            grandProfit += parseInt(tx.profit);
+
+            (tx.items || []).forEach(item => {
+                const qty = intval(item.quantity);
+                const subOmset = intval(item.subtotal);
+                const subModal = intval(item.subtotal_cost) || (intval(item.cost) * qty);
+                const subProfit = subOmset - subModal;
+
+                grandQty += qty;
+
+                const key = (item.variant || '') + ' - ' + item.menu_name;
+                if (!itemSummaryMap.has(key)) {
+                    itemSummaryMap.set(key, {
+                        variant: item.variant || 'mini',
+                        name: item.menu_name,
+                        portion: item.portion || '',
+                        price: intval(item.price),
+                        cost: intval(item.cost),
+                        totalQty: 0,
+                        totalOmset: 0,
+                        totalModal: 0,
+                        totalProfit: 0
+                    });
+                }
+                const record = itemSummaryMap.get(key);
+                record.totalQty += qty;
+                record.totalOmset += subOmset;
+                record.totalModal += subModal;
+                record.totalProfit += subProfit;
+            });
+        });
+
+        function intval(v) { return parseInt(v) || 0; }
+
+        // Build Inventory Summary Rows
+        let inventoryRowsHtml = '';
+        let rowNo = 1;
+        itemSummaryMap.forEach((item) => {
+            inventoryRowsHtml += `
+                <tr style="border-bottom: 1px solid #eee; font-size: 11px;">
+                    <td style="padding: 6px; text-align: center;">${rowNo++}</td>
+                    <td style="padding: 6px;"><span style="background: #fff3d6; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase;">${item.variant}</span></td>
+                    <td style="padding: 6px; font-weight: bold;">${item.name}</td>
+                    <td style="padding: 6px; color: #666;">${item.portion}</td>
+                    <td style="padding: 6px; text-align: center; font-weight: bold; font-size: 12px; color: #d97706;">${item.totalQty} porsi</td>
+                    <td style="padding: 6px; text-align: right;">Rp ${item.totalOmset.toLocaleString('id-ID')}</td>
+                    <td style="padding: 6px; text-align: right; color: #555;">Rp ${item.totalModal.toLocaleString('id-ID')}</td>
+                    <td style="padding: 6px; text-align: right; font-weight: bold; color: #059669;">Rp ${item.totalProfit.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        });
+
+        // Build Transaction Log Rows
+        let txRowsHtml = reportData.slice(0, 30).map((tx, idx) => {
+            const itemsStr = (tx.items || []).map(i => `${i.menu_name} (x${i.quantity})`).join(', ');
+            return `
+                <tr style="border-bottom: 1px solid #eee; font-size: 10px;">
+                    <td style="padding: 5px; text-align: center;">${idx + 1}</td>
+                    <td style="padding: 5px; font-family: monospace; font-weight: bold;">${tx.formatted_time || tx.created_at}</td>
+                    <td style="padding: 5px; font-family: monospace; color: #e67382; font-weight: bold;">${tx.transaction_code}</td>
+                    <td style="padding: 5px;">${itemsStr}</td>
+                    <td style="padding: 5px; font-weight: bold;">${tx.payment_method}</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold;">Rp ${intval(tx.total_amount).toLocaleString('id-ID')}</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold; color: #059669;">Rp ${intval(tx.profit).toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Create PDF Template Element
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.padding = '20px';
+        pdfContainer.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+        pdfContainer.style.color = '#4A3728';
+        pdfContainer.style.backgroundColor = '#ffffff';
+
+        pdfContainer.innerHTML = `
+            <!-- HEADER LETTERHEAD -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px double #FFBFA9; padding-bottom: 12px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; background: #FF9EAA; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                        🥟
+                    </div>
+                    <div>
+                        <h1 style="font-size: 20px; font-weight: 800; margin: 0; color: #4A3728;">CIPPY DIMSUM</h1>
+                        <p style="font-size: 11px; margin: 2px 0 0 0; color: #7A6250;">Laporasi Rekapitulasi Stok Inventory & Keuntungan Penjualan</p>
+                    </div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #666;">
+                    <p style="margin: 0; font-weight: bold;">PERIODE LAPORAN:</p>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 800; color: #E67382;">${startDate} s/d ${endDate}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 10px; color: #888;">Dicetak pada: ${printTime}</p>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE SUMMARY CARDS -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px;">
+                <div style="background: #fffdf9; border: 1px solid #ffe5ad; padding: 10px; border-radius: 8px; text-align: center;">
+                    <span style="font-size: 10px; color: #7a6250; font-weight: bold; text-transform: uppercase;">Total Omset</span>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #4a3728; margin: 4px 0 0 0;">Rp ${grandOmset.toLocaleString('id-ID')}</h3>
+                </div>
+                <div style="background: #fcfcfc; border: 1px solid #e5e5e5; padding: 10px; border-radius: 8px; text-align: center;">
+                    <span style="font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase;">Total Modal</span>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #555; margin: 4px 0 0 0;">Rp ${grandModal.toLocaleString('id-ID')}</h3>
+                </div>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; text-align: center;">
+                    <span style="font-size: 10px; color: #166534; font-weight: bold; text-transform: uppercase;">Keuntungan Bersih</span>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #059669; margin: 4px 0 0 0;">Rp ${grandProfit.toLocaleString('id-ID')}</h3>
+                </div>
+                <div style="background: #fff1f2; border: 1px solid #fecdd3; padding: 10px; border-radius: 8px; text-align: center;">
+                    <span style="font-size: 10px; color: #9f1239; font-weight: bold; text-transform: uppercase;">Total Stok Terjual</span>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #e67382; margin: 4px 0 0 0;">${grandQty} porsi (${reportData.length} Tx)</h3>
+                </div>
+            </div>
+
+            <!-- TABLE 1: INVENTORY STOCK RECAP -->
+            <div style="margin-bottom: 18px;">
+                <h3 style="font-size: 13px; font-weight: 800; color: #4a3728; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
+                    📦 REKAPITULASI STOK INVENTORY TERJUAL PER MENU
+                </h3>
+                <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #ffe5ad;">
+                    <thead>
+                        <tr style="background: #ffe5ad; font-size: 10px; text-transform: uppercase; color: #4a3728;">
+                            <th style="padding: 6px; text-align: center;">No</th>
+                            <th style="padding: 6px; text-align: left;">Varian</th>
+                            <th style="padding: 6px; text-align: left;">Nama Menu</th>
+                            <th style="padding: 6px; text-align: left;">Porsi</th>
+                            <th style="padding: 6px; text-align: center;">Stok Terjual</th>
+                            <th style="padding: 6px; text-align: right;">Total Omset</th>
+                            <th style="padding: 6px; text-align: right;">Total Modal</th>
+                            <th style="padding: 6px; text-align: right;">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${inventoryRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TABLE 2: LOG TRANSAKSI -->
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 13px; font-weight: 800; color: #4a3728; margin: 0 0 8px 0;">
+                    🕒 DETAIL LOG TRANSAKSI PENJUALAN
+                </h3>
+                <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="background: #f5f5f5; font-size: 10px; text-transform: uppercase; color: #444;">
+                            <th style="padding: 5px; text-align: center;">No</th>
+                            <th style="padding: 5px; text-align: left;">Waktu (WIB)</th>
+                            <th style="padding: 5px; text-align: left;">Kode Tx</th>
+                            <th style="padding: 5px; text-align: left;">Item Terjual</th>
+                            <th style="padding: 5px; text-align: left;">Bayar</th>
+                            <th style="padding: 5px; text-align: right;">Omset</th>
+                            <th style="padding: 5px; text-align: right;">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${txRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FOOTER SIGNATURE SECTION -->
+            <div style="display: flex; justify-content: flex-end; margin-top: 30px; font-size: 11px;">
+                <div style="text-align: center; width: 200px;">
+                    <p style="margin: 0; font-weight: bold;">Jakarta, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    <p style="margin: 2px 0 0 0; color: #666;">Penanggung Jawab / Owner</p>
+                    <div style="height: 50px;"></div>
+                    <p style="margin: 0; font-weight: 800; border-top: 1px dashed #aaa; padding-top: 4px; color: #4a3728;">( CIPPY DIMSUM )</p>
+                </div>
+            </div>
+        `;
 
         const opt = {
-            margin:       0.3,
-            filename:     `Rekap_CippyDimsum_${startDate}_sd_${endDate}.pdf`,
+            margin:       0.2,
+            filename:     `Laporan_Inventory_CippyDimsum_${startDate}_sd_${endDate}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
+            html2canvas:  { scale: 2, logging: false },
             jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            showToast('Laporan PDF berhasil diunduh! 📄', 'success');
+        html2pdf().set(opt).from(pdfContainer).save().then(() => {
+            showToast('Laporan Inventory & Keuangan PDF Berhasil Diunduh! 📄', 'success');
         });
     }
+
 </script>
 
 </body>
